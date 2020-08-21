@@ -1,18 +1,84 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div>
+      Language : <b v-if="!$apollo.queries.language.loading">{{ language }}</b>
+      <span v-else>Loading...</span><br />
+    </div>
+    Champions : <b v-if="!$apollo.queries.getChampions.loading"> {{ JSON.stringify(getChampions) }}</b>
+    <span v-else>Loading...</span><br />
+    Champion : <b v-if="!$apollo.queries.getChampionByName.loading"> {{ JSON.stringify(getChampionByName) }}</b>
+    <span v-else>Loading...</span><br />
+    <div>
+      <h3>Example Mutation</h3>
+      Name: <input v-model="name">
+      Attack Damage: <input v-model.number="attack">
+      <div>
+        Data:
+        {{ updatedChampion }}
+      </div>
+      <button @click="updateAttackDamage">Update Champion</button>
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+// import HelloWorld from './components/HelloWorld.vue'
+import gql from 'graphql-tag'
 
 export default {
   name: 'app',
-  components: {
-    HelloWorld
-  }
+  data() {
+    return {
+      name: '',
+      attack: null,
+      updatedChampion: null
+    };
+  },
+  apollo: {
+    // Simple query that will update the 'hello' vue property
+    language: gql`{
+      language
+    }`,
+    getChampions: gql`{
+      getChampions { name attackDamage }
+    }`,
+    getChampionByName: {
+      query: gql`query GetChampionByName($championName: String!) {
+        getChampionByName(name: $championName) { name attackDamage }
+      }`,
+      variables: {
+        championName: 'Ashe'
+      },
+      // Additional options here
+      fetchPolicy: 'cache-and-network',
+    }
+  },
+  methods: {
+    updateAttackDamage () {
+      const res = this.$apollo.mutate({
+        mutation: gql`
+        mutation UpdateAttackDamage($championName: String!, $attackDamage: Float) {
+          updateAttackDamage(name: $championName, attackDamage: $attackDamage) {
+            name
+            attackDamage
+          }
+        }`,
+        variables: {
+          championName: this.name,
+          attackDamage: this.attack
+        }
+      })
+      res.then((data) => {
+        const newUpdate = data.data .updateAttackDamage
+        this.updatedChampion = newUpdate
+        this.getChampionByName = newUpdate
+      })
+      
+    },
+  },
+  // components: {
+  //   HelloWorld
+  // }
 }
 </script>
 
