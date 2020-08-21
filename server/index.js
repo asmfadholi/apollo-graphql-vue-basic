@@ -2,9 +2,7 @@ const express = require('express')
 const { graphql, buildSchema } = require('graphql')
 const { graphqlHTTP } = require('express-graphql')
 const cors = require('cors')
-const timeout = require('connect-timeout')
 const Champion = require('./champion.js')
-const { set } = require('core-js/fn/dict')
 
 const champions = [
   new Champion('Ashe', 100),
